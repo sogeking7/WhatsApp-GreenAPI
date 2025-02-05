@@ -1,46 +1,57 @@
 import { NextRequest, NextResponse } from "next/server";
-import { decrypt } from "@/app/lib/session";
+import { decrypt, deleteSession } from "@/app/lib/session";
 import { cookies } from "next/headers";
+import { getStateInstance } from "@/app/actions/auth";
 
 const protectedRoutes = ["/chat", "/"];
-const publicRoutes = ["/auth/sign-in"];
+const authPage = "/auth/sign-in";
 
 export default async function middleware(req: NextRequest) {
-  // 2. Check if the current route is protected or public
   const path = req.nextUrl.pathname;
   const isProtectedRoute = protectedRoutes.includes(path);
-  const isPublicRoute = publicRoutes.includes(path);
+  const isAuthPage = path === authPage;
 
-  // 3. Decrypt the session from the cookie
-  const cookie = (await cookies()).get("session")?.value;
-  const session = await decrypt(cookie);
+  try {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("session")?.value;
+    const session = sessionCookie ? await decrypt(sessionCookie) : null;
 
-  // 4. Redirect to /auth/sign-in if the user is not authenticated
+    //@ts-ignore
+    const idInstance = session?.idInstance;
+    //@ts-ignore
+    const apiTokenInstance = session?.apiTokenInstance;
 
-  if (
-    isProtectedRoute &&
-    // @ts-ignore
-    (!session?.idInstance || !session?.apiTokenInstance)
-  ) {
-    return NextResponse.redirect(new URL("/auth/sign-in", req.nextUrl));
-  }
+    if (isProtectedRoute && (!idInstance || !apiTokenInstance)) {
+      console.log("User is not authenticated. Redirecting to /auth/sign-in.");
+      return NextResponse.redirect(new URL(authPage, req.nextUrl));
+    }
 
-  // 5. Redirect to /chat if the user is authenticated
-  if (
-    isPublicRoute &&
-    // @ts-ignore
-    session?.idInstance &&
-    // @ts-ignore
-    session?.apiTokenInstance &&
-    !req.nextUrl.pathname.startsWith("/chat")
-  ) {
-    return NextResponse.redirect(new URL("/chat", req.nextUrl));
+    if (idInstance && apiTokenInstance) {
+      try {
+        const { data } = await getStateInstance({
+          idInstance,
+          apiTokenInstance,
+        });
+        if (data.stateInstance !== "authorized" && !isAuthPage) {
+          console.log(
+            "Instance is NOT authorized. Redirecting to /auth/sign-in.",
+          );
+          await deleteSession();
+          return NextResponse.redirect(new URL(authPage, req.nextUrl));
+        }
+      } catch (e: unknown) {
+        // @ts-expect-error
+        console.error(e?.message || "Unknown error");
+        await deleteSession();
+      }
+    }
+  } catch (error) {
+    console.error("Middleware error:", error);
   }
 
   return NextResponse.next();
 }
 
-// Routes Middleware should not run on
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|.*\\.png$).*)"],
 };

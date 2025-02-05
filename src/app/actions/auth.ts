@@ -12,7 +12,7 @@ type GetStateInstance = {
     | "yellowCard";
 };
 
-const getStateInstance = async (values: SignInForm) => {
+export const getStateInstance = async (values: SignInForm) => {
   const { idInstance, apiTokenInstance } = values;
   return await axiosInstance.get<GetStateInstance>(
     `/waInstance${idInstance}/getStateInstance/${apiTokenInstance}`,
