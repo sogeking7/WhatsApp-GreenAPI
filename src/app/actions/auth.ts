@@ -2,14 +2,16 @@ import { SignInForm } from "@/lib/definitions";
 import axiosInstance from "@/lib/axios";
 import { createSession, deleteSession } from "@/app/lib/session";
 
+export type StateInstance =
+  | "notAuthorized"
+  | "authorized"
+  | "blocked"
+  | "sleepMode"
+  | "starting"
+  | "yellowCard";
+
 type GetStateInstance = {
-  stateInstance:
-    | "notAuthorized"
-    | "authorized"
-    | "blocked"
-    | "sleepMode"
-    | "starting"
-    | "yellowCard";
+  stateInstance: StateInstance;
 };
 
 export const getStateInstance = async (values: SignInForm) => {
