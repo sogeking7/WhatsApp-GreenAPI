@@ -50,7 +50,7 @@ export const AccountAvatar = async () => {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>{phone}</DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <SignOutButton />
         </DropdownMenuItem>
       </DropdownMenuContent>
