@@ -42,7 +42,7 @@ export default async function middleware(req: NextRequest) {
       } catch (e: unknown) {
         // @ts-expect-error
         console.error(e?.message || "Unknown error");
-        await deleteSession();
+        // await deleteSession();
       }
     }
   } catch (error) {
