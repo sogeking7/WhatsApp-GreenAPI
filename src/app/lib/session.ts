@@ -1,8 +1,9 @@
 "use server";
+
 import { cookies } from "next/headers";
 import { JWTPayload, jwtVerify, SignJWT } from "jose";
 
-const SECRET = "secret";
+const SECRET = process.env.SECRET;
 const KEY = new TextEncoder().encode(SECRET);
 
 export type Session = {
@@ -42,6 +43,7 @@ export async function createSession(
     path: "/",
   });
 }
+
 export async function getSession() {
   const cookieStore = await cookies();
   const session = cookieStore.get("session")?.value;

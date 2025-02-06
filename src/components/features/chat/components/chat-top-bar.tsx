@@ -4,7 +4,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useChatStore } from "@/stores/chat-store";
 
 export const ChatTopBar = () => {
-  const { currentChatCard, currentChatId } = useChatStore();
+  const { currentChatCard } = useChatStore();
 
   if (!currentChatCard) return null;
 
@@ -15,7 +15,6 @@ export const ChatTopBar = () => {
           <AvatarImage src={currentChatCard?.avatar || "no-image.jpg"} />
         </Avatar>
         <h3 className={"text-base font-semibold"}>{currentChatCard?.name}</h3>
-        <p>{currentChatId}</p>
       </div>
     </div>
   );
