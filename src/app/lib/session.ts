@@ -1,12 +1,16 @@
 "use server";
 import { cookies } from "next/headers";
-import { jwtVerify, SignJWT } from "jose";
+import { JWTPayload, jwtVerify, SignJWT } from "jose";
 
 const SECRET = "secret";
 const KEY = new TextEncoder().encode(SECRET);
 
-export async function encrypt(payload: unknown) {
-  // @ts-expect-error
+export type Session = {
+  idInstance: string;
+  apiTokenInstance: string;
+};
+
+export async function encrypt(payload: JWTPayload) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -14,8 +18,7 @@ export async function encrypt(payload: unknown) {
     .sign(KEY);
 }
 
-export async function decrypt(input: string | undefined): Promise<unknown> {
-  if (!input) return null;
+export async function decrypt(input: string): Promise<JWTPayload> {
   const { payload } = await jwtVerify(input, KEY, {
     algorithms: ["HS256"],
   });
@@ -53,6 +56,8 @@ export async function deleteSession() {
 
 export async function updateSession() {
   const session = (await cookies()).get("session")?.value;
+  if (!session) return null;
+
   const payload = await decrypt(session);
 
   if (!session || !payload) {

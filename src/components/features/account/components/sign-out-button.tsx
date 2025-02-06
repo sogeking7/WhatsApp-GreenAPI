@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { signOut } from "@/app/actions/auth";
 import { redirect } from "next/navigation";
+import { LogOut } from "lucide-react";
 
 export const SignOutButton = () => {
   return (
@@ -12,6 +12,7 @@ export const SignOutButton = () => {
         redirect("/auth/sign-in");
       }}
     >
+      <LogOut className={"text-destructive"} />
       Log out
     </button>
   );

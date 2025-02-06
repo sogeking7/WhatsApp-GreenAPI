@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { decrypt, deleteSession } from "@/app/lib/session";
-import { cookies } from "next/headers";
+import { deleteSession } from "@/app/lib/session";
 import { getStateInstance } from "@/app/actions/auth";
+import { getCredentials } from "@/app/actions";
 
 const protectedRoutes = ["/chat", "/"];
 const authPage = "/auth/sign-in";
@@ -12,14 +12,7 @@ export default async function middleware(req: NextRequest) {
   const isAuthPage = path === authPage;
 
   try {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("session")?.value;
-    const session = sessionCookie ? await decrypt(sessionCookie) : null;
-
-    //@ts-ignore
-    const idInstance = session?.idInstance;
-    //@ts-ignore
-    const apiTokenInstance = session?.apiTokenInstance;
+    const { idInstance, apiTokenInstance } = await getCredentials();
 
     if (isProtectedRoute && (!idInstance || !apiTokenInstance)) {
       console.log("User is not authenticated. Redirecting to /auth/sign-in.");
@@ -29,8 +22,8 @@ export default async function middleware(req: NextRequest) {
     if (idInstance && apiTokenInstance) {
       try {
         const { data } = await getStateInstance({
-          idInstance,
-          apiTokenInstance,
+          idInstance: idInstance as string,
+          apiTokenInstance: apiTokenInstance as string,
         });
         if (data.stateInstance !== "authorized" && !isAuthPage) {
           console.log(

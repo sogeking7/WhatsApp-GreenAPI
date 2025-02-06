@@ -1,24 +1,52 @@
 import { createStore } from "zustand/vanilla";
+import { createJSONStorage, persist } from "zustand/middleware";
+
+export type ChatCard = {
+  avatar: string;
+  name: string;
+  chatId: string;
+};
 
 export type ChatsState = {
-  count: number;
+  chats: ChatCard[];
 };
 
 export type ChatsActions = {
-  decrementCount: () => void;
-  incrementCount: () => void;
+  addNewChat: (new_chat: ChatCard) => void;
+  removeChat: (chatId: string) => void;
 };
 
 export type ChatsStore = ChatsState & ChatsActions;
 
 export const defaultInitState: ChatsState = {
-  count: 0,
+  chats: [],
 };
 
 export const createChatsStore = (initState: ChatsState = defaultInitState) => {
-  return createStore<ChatsState>()((set) => ({
-    ...initState,
-    decrementCount: () => set((state) => ({ count: state.count - 1 })),
-    incrementCount: () => set((state) => ({ count: state.count + 1 })),
-  }));
+  return createStore<ChatsStore>()(
+    persist(
+      (set) => ({
+        ...initState,
+        addNewChat: (new_chat) =>
+          set((state) => {
+            const isExist = state.chats.some(
+              (chat) => chat.chatId === new_chat.chatId,
+            );
+            if (isExist) return state;
+            return { chats: [...state.chats, new_chat] };
+          }),
+        removeChat: (chatId: string) =>
+          set((state) => {
+            const filteredChats = state.chats.filter(
+              (chat) => chat.chatId !== chatId,
+            );
+            return { chats: filteredChats };
+          }),
+      }),
+      {
+        name: "chats-storage",
+        storage: createJSONStorage(() => localStorage),
+      },
+    ),
+  );
 };
