@@ -14,8 +14,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { getContactInfo } from "@/app/actions/chat";
-import { useChatsStore } from "@/stores/chats-store-provider";
 import { Loader } from "lucide-react";
+import { useChatStore } from "@/stores/chat-store";
 
 const CreateNewChartSchema = z.object({
   chatId: z.string().length(12, {
@@ -31,7 +31,7 @@ export const CreateNewChatForm = ({
 }: {
   setDialogOpen: (open: boolean) => void;
 }) => {
-  const chatsStore = useChatsStore((state) => state);
+  const chatsStore = useChatStore();
 
   const form = useForm<CreateNewChart>({
     resolver: zodResolver(CreateNewChartSchema),

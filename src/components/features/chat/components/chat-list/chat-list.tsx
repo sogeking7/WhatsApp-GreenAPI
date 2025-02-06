@@ -1,11 +1,12 @@
 "use client";
 
-import { useChatsStore } from "@/stores/chats-store-provider";
 import { Separator } from "@/components/ui/separator";
 import { ChatListCard } from "@/components/features/chat/components/chat-list/chat-list-card";
+import { useChatStore } from "@/stores/chat-store";
 
 export const ChatList = () => {
-  const { chats } = useChatsStore((state) => state);
+  const { chats } = useChatStore();
+
   return (
     <ul>
       {chats.map((chat) => (

@@ -3,12 +3,13 @@
 import { ChatTopBar } from "@/components/features/chat/components/chat-top-bar";
 import { Chat } from "@/components/features/chat/components/chat";
 import { ChatInputForm } from "@/components/features/chat/components/chat-input-form";
-import { useChatsStore } from "@/stores/chats-store-provider";
 import { useHotkeys } from "@/hooks/use-hotkeys";
+import { useChatStore } from "@/stores/chat-store";
 
 export default function ChatPage() {
   const { currentChatId, removeCurrentChatId, removeCurrentChatCard } =
-    useChatsStore((state) => state);
+    useChatStore();
+
   useHotkeys("Escape", null, () => {
     removeCurrentChatId();
     removeCurrentChatCard();

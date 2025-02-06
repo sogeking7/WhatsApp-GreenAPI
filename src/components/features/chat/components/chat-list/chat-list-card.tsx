@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { EllipsisVertical, Trash } from "lucide-react";
 import {
@@ -7,9 +8,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useChatsStore } from "@/stores/chats-store-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useChatStore } from "@/stores/chat-store";
 
 export const ChatListCard = ({
   data,
@@ -20,16 +21,33 @@ export const ChatListCard = ({
     chatId: string;
   };
 }) => {
-  const { removeChat, currentChatId, setCurrentChatId, setCurrentChatCard } =
-    useChatsStore((state) => state);
+  const {
+    removeChat,
+    currentChatId,
+    setCurrentChatId,
+    setCurrentChatCard,
+    removeCurrentChatCard,
+    removeCurrentChatId,
+  } = useChatStore();
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
+    setCurrentChatId(data.chatId);
+    setCurrentChatCard(data);
+  };
+
+  const handleRemove = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
+    removeChat(data.chatId);
+    removeCurrentChatId();
+    removeCurrentChatCard();
+  };
 
   return (
     <div
-      onClick={(e) => {
-        e.stopPropagation();
-        setCurrentChatId(data.chatId);
-        setCurrentChatCard(data);
-      }}
+      onClick={handleClick}
       className={cn(
         data.chatId === currentChatId && "bg-gray-300/60",
         data.chatId !== currentChatId && "hover:bg-gray-200/60 ",
@@ -50,11 +68,7 @@ export const ChatListCard = ({
           <EllipsisVertical className={"size-4"} />
         </PopoverTrigger>
         <PopoverContent className={"w-auto"}>
-          <Button
-            onClick={() => removeChat(data.chatId)}
-            size={"sm"}
-            variant={"ghost"}
-          >
+          <Button onClick={handleRemove} size={"sm"} variant={"ghost"}>
             <Trash className={"text-destructive"} />
             Remove
           </Button>

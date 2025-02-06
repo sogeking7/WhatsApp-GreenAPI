@@ -1,7 +1,5 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { signOut } from "@/app/actions/auth";
-import { redirect } from "next/navigation";
 
 export default function Home() {
   return (
