@@ -9,32 +9,23 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { getContactInfo } from "@/app/actions/chat";
 import { Loader } from "lucide-react";
 import { useChatStore } from "@/stores/chat-store";
-
-const CreateNewChartSchema = z.object({
-  chatId: z.string().length(12, {
-    message:
-      "Введите корректный номер телефона в формате +X (XXX) - XXX - XX - XX",
-  }),
-});
-
-type CreateNewChart = z.infer<typeof CreateNewChartSchema>;
+import { TCreateNewChatForm, CreateNewChartFormSchema } from "@/types/schema";
 
 export const CreateNewChatForm = ({
   setDialogOpen,
 }: {
   setDialogOpen: (open: boolean) => void;
 }) => {
-  const chatsStore = useChatStore();
+  const addNewChat = useChatStore((state) => state.addNewChat);
 
-  const form = useForm<CreateNewChart>({
-    resolver: zodResolver(CreateNewChartSchema),
+  const form = useForm<TCreateNewChatForm>({
+    resolver: zodResolver(CreateNewChartFormSchema),
     defaultValues: {
       chatId: "",
     },
@@ -45,19 +36,18 @@ export const CreateNewChatForm = ({
     formState: { errors },
   } = form;
 
-  const onSubmit = async (values: CreateNewChart) => {
+  const onSubmit = async (values: TCreateNewChatForm) => {
     values.chatId = values.chatId.slice(1) + "@c.us";
-    try {
-      const { data } = await getContactInfo(values.chatId);
-      chatsStore.addNewChat(data);
+    const res = await getContactInfo(values.chatId);
+    if (res.success) {
+      addNewChat(res.data);
       setDialogOpen(false);
-    } catch (e) {
+    } else {
       setError("root.serverError", {
-        // @ts-expect-error
-        message: e?.message || "Unknown error",
+        message: res.message
       });
     }
-  };
+  }
 
   return (
     <Form {...form}>

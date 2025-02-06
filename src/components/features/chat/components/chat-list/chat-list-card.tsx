@@ -11,15 +11,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useChatStore } from "@/stores/chat-store";
+import { TGetContactInfo } from "@/types/green-api";
 
 export const ChatListCard = ({
   data,
 }: {
-  data: {
-    avatar: string;
-    name: string;
-    chatId: string;
-  };
+  data: TGetContactInfo
 }) => {
   const {
     removeChat,
@@ -32,14 +29,12 @@ export const ChatListCard = ({
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-
     setCurrentChatId(data.chatId);
     setCurrentChatCard(data);
   };
 
   const handleRemove = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-
     removeChat(data.chatId);
     removeCurrentChatId();
     removeCurrentChatCard();

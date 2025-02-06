@@ -1,45 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { deleteSession } from "@/app/lib/session";
-import { getStateInstance } from "@/app/actions/auth";
-import { getCredentials } from "@/app/actions";
-
-const protectedRoutes = ["/chat", "/"];
-const authPage = "/auth/sign-in";
+import { decrypt } from "@/app/lib/session";
+import { cookies } from "next/headers";
 
 export default async function middleware(req: NextRequest) {
-  const path = req.nextUrl.pathname;
-  const isProtectedRoute = protectedRoutes.includes(path);
-  const isAuthPage = path === authPage;
+  const protectedRoutes = ["/chat"];
+  const currentPath = req.nextUrl.pathname;
+  const isProtectedRoute = protectedRoutes.includes(currentPath);
 
-  try {
-    const { idInstance, apiTokenInstance } = await getCredentials();
+  if (isProtectedRoute) {
+    const cookie = (await cookies()).get("session")?.value;
+    const session = await decrypt(cookie);
 
-    if (isProtectedRoute && (!idInstance || !apiTokenInstance)) {
-      console.log("User is not authenticated. Redirecting to /auth/sign-in.");
-      return NextResponse.redirect(new URL(authPage, req.nextUrl));
+    if (!session?.idInstance && !session?.apiTokenInstance) {
+      return NextResponse.redirect(new URL("auth/sign-in", req.nextUrl));
     }
-
-    if (idInstance && apiTokenInstance) {
-      try {
-        const { data } = await getStateInstance({
-          idInstance: idInstance as string,
-          apiTokenInstance: apiTokenInstance as string,
-        });
-        if (data.stateInstance !== "authorized" && !isAuthPage) {
-          console.log(
-            "Instance is NOT authorized. Redirecting to /auth/sign-in.",
-          );
-          await deleteSession();
-          return NextResponse.redirect(new URL(authPage, req.nextUrl));
-        }
-      } catch (e: unknown) {
-        // @ts-expect-error
-        console.error(e?.message || "Unknown error");
-        // await deleteSession();
-      }
-    }
-  } catch (error) {
-    console.error("Middleware error:", error);
   }
 
   return NextResponse.next();

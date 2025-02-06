@@ -13,15 +13,15 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { SignInForm, SignInFormSchema } from "@/lib/definitions";
-import { signIn } from "@/app/actions/auth";
 import { Loader } from "lucide-react";
 import { useState } from "react";
-import { redirect } from "next/navigation";
+import { signIn } from "@/app/actions/auth";
+import { SignInFormSchema, TSignInForm } from "@/types/schema";
 
 export const LoginForm = () => {
   const [error, setError] = useState<string>("");
-  const form = useForm<SignInForm>({
+
+  const form = useForm<TSignInForm>({
     resolver: zodResolver(SignInFormSchema),
     defaultValues: {
       idInstance: "7103186490",
@@ -29,12 +29,15 @@ export const LoginForm = () => {
     },
   });
 
-  const onSubmit = async (values: SignInForm) => {
-    const stateInstance = await signIn(values);
-    if (stateInstance === "authorized") {
-      redirect("/chat");
-    } else {
-      setError(stateInstance);
+  const onSubmit = async (values: TSignInForm) => {
+    const res = await signIn(values);
+
+    if (res.success && res.data.stateInstance !== "authorized") {
+      setError(res.data.stateInstance);
+    }
+
+    if (!res.success) {
+      setError(res.message)
     }
   };
 

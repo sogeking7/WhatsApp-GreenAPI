@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SignOutButton } from "@/components/features/account/components/sign-out-button";
-import { getWaSettings } from "@/app/actions/account";
+import { getUser } from "@/app/data/user";
 
 export const AccountAvatar = async () => {
-  const { data } = await getWaSettings();
+  const data = await getUser();
+
   const { avatar, phone } = data;
   return (
     <DropdownMenu>

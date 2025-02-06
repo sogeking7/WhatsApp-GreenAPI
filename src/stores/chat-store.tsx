@@ -1,30 +1,26 @@
+import { TGetContactInfo } from "@/types/green-api";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-export type ChatCard = {
-  avatar: string;
-  name: string;
-  chatId: string;
-};
-
-export type ChatState = {
-  chats: ChatCard[];
-  currentChatCard: ChatCard | null;
+type ChatState = {
+  chats: TGetContactInfo[];
+  currentChatCard: TGetContactInfo | null;
   currentChatId: string | null;
 };
 
-export type ChatActions = {
-  addNewChat: (new_chat: ChatCard) => void;
+type ChatActions = {
+  addNewChat: (new_chat: TGetContactInfo
+  ) => void;
   removeChat: (chatId: string) => void;
   setCurrentChatId: (chatId: string) => void;
   removeCurrentChatId: () => void;
-  setCurrentChatCard: (chat_card: ChatCard) => void;
+  setCurrentChatCard: (chat_card: TGetContactInfo) => void;
   removeCurrentChatCard: () => void;
 };
 
-export type ChatStore = ChatState & ChatActions;
+type ChatStore = ChatState & ChatActions;
 
-export const defaultInitState: ChatState = {
+const defaultInitState: ChatState = {
   chats: [],
   currentChatId: null,
   currentChatCard: null,

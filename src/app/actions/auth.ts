@@ -1,39 +1,26 @@
-import { SignInForm } from "@/lib/definitions";
-import axiosInstance from "@/lib/axios";
 import { createSession, deleteSession } from "@/app/lib/session";
+import { TGetStateInstance } from "@/types/green-api";
+import { Response } from "@/types/api";
+import { TSignInForm } from "@/types/schema";
 
-export type StateInstance =
-  | "notAuthorized"
-  | "authorized"
-  | "blocked"
-  | "sleepMode"
-  | "starting"
-  | "yellowCard";
+export async function signIn(values: TSignInForm) {
+	const response = await fetch("/api/getStateInstance", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(values),
+	});
 
-type GetStateInstance = {
-  stateInstance: StateInstance;
-};
+	const res: Response<TGetStateInstance> = await response.json();
 
-export const getStateInstance = async (values: SignInForm) => {
-  const { idInstance, apiTokenInstance } = values;
-  return await axiosInstance.get<GetStateInstance>(
-    `/waInstance${idInstance}/getStateInstance/${apiTokenInstance}`,
-  );
-};
+	if (res.success && res.data.stateInstance === "authorized") {
+		await createSession(values);
+	}
 
-export async function signIn(values: SignInForm) {
-  try {
-    const { data } = await getStateInstance(values);
-    if (data.stateInstance === "authorized") {
-      await createSession(values.idInstance, values.apiTokenInstance);
-    }
-    return data.stateInstance;
-  } catch (e: unknown) {
-    // @ts-expect-error
-    return e?.message || "Unknown error";
-  }
+	return res;
 }
 
 export async function signOut() {
-  await deleteSession();
+	await deleteSession();
 }
