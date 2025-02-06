@@ -24,3 +24,34 @@ export type TGetContactInfo = {
 export type TSendMessage = {
 	idMessage: string;
 };
+
+export type TReceiveNotification = {
+	receiptId: number,
+	body: {
+		typeWebhook: "incomingMessageReceived";
+		instanceData: {
+			idInstance: number;
+			wid: string;
+			typeInstance: "whatsapp";
+		};
+		timestamp: number;
+		idMessage: string;
+		senderData: {
+			chatId: string;
+			sender: string;
+			chatName: string;
+			senderName: string;
+			senderContactName: string;
+		};
+		messageData: {
+			typeMessage: "textMessage";
+			textMessageData: {
+				textMessage: string;
+			};
+		}
+	}
+} | null;
+
+export type TDeleteNotification = {
+	result: boolean
+}
