@@ -14,13 +14,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Loader } from "lucide-react";
-import { useState } from "react";
 import { signIn } from "@/app/actions/auth";
 import { SignInFormSchema, TSignInForm } from "@/types/schema";
 
 export const LoginForm = () => {
-  const [error, setError] = useState<string>("");
-
   const form = useForm<TSignInForm>({
     resolver: zodResolver(SignInFormSchema),
     defaultValues: {
@@ -29,15 +26,21 @@ export const LoginForm = () => {
     },
   });
 
+  const { setError, formState: { errors } } = form;
+
   const onSubmit = async (values: TSignInForm) => {
     const res = await signIn(values);
 
-    if (res.success && res.data.stateInstance !== "authorized") {
-      setError(res.data.stateInstance);
-    }
-
-    if (!res.success) {
-      setError(res.message)
+    if (res.success) {
+      if (res.data.stateInstance !== "authorized") {
+        setError("root.serverError", {
+          message: res.data.stateInstance
+        })
+      }
+    } else {
+      setError("root.serverError", {
+        message: res.message
+      });
     }
   };
 
@@ -73,7 +76,9 @@ export const LoginForm = () => {
             </FormItem>
           )}
         />
-        <FormMessage>{error && error}</FormMessage>
+        <FormMessage>
+          {errors.root?.serverError.message && errors.root?.serverError.message}
+        </FormMessage>
         <Button
           disabled={form.formState.isSubmitting || form.formState.isLoading}
           className="w-full"
