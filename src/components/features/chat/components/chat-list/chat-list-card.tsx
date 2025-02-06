@@ -1,3 +1,5 @@
+"use client";
+
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { EllipsisVertical, Trash } from "lucide-react";
 import {
@@ -7,6 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { useChatsStore } from "@/stores/chats-store-provider";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export const ChatListCard = ({
   data,
@@ -17,10 +20,22 @@ export const ChatListCard = ({
     chatId: string;
   };
 }) => {
-  const { removeChat } = useChatsStore((state) => state);
+  const { removeChat, currentChatId, setCurrentChatId, setCurrentChatCard } =
+    useChatsStore((state) => state);
 
   return (
-    <li className="w-full py-4 px-6 hover:bg-gray-200 flex justify-between relative">
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        setCurrentChatId(data.chatId);
+        setCurrentChatCard(data);
+      }}
+      className={cn(
+        data.chatId === currentChatId && "bg-gray-300/60",
+        data.chatId !== currentChatId && "hover:bg-gray-200/60 ",
+        "w-full py-4 px-6  flex justify-between relative",
+      )}
+    >
       <div className={"flex gap-4"}>
         <Avatar className={"size-12"}>
           <AvatarImage src={data.avatar || "no-image.jpg"} />
@@ -45,6 +60,6 @@ export const ChatListCard = ({
           </Button>
         </PopoverContent>
       </Popover>
-    </li>
+    </div>
   );
 };

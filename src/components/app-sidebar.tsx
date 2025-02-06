@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { CreateNewChat } from "@/components/features/chat/components/create-new-chat/create-new-chat";
-import { ChatsList } from "@/components/features/chat/components/chats-list";
+import { ChatList } from "@/components/features/chat/components/chat-list/chat-list";
 
 export const AppSidebar = () => {
   return (
@@ -13,7 +13,7 @@ export const AppSidebar = () => {
         </div>
       </div>
       <div>
-        <ChatsList />
+        <ChatList />
       </div>
     </nav>
   );

@@ -6,6 +6,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,7 +18,10 @@ import { useChatsStore } from "@/stores/chats-store-provider";
 import { Loader } from "lucide-react";
 
 const CreateNewChartSchema = z.object({
-  chatId: z.string(),
+  chatId: z.string().length(12, {
+    message:
+      "Введите корректный номер телефона в формате +X (XXX) - XXX - XX - XX",
+  }),
 });
 
 type CreateNewChart = z.infer<typeof CreateNewChartSchema>;
@@ -36,11 +40,23 @@ export const CreateNewChatForm = ({
     },
   });
 
+  const {
+    setError,
+    formState: { errors },
+  } = form;
+
   const onSubmit = async (values: CreateNewChart) => {
     values.chatId = values.chatId.slice(1) + "@c.us";
-    const { data } = await getContactInfo(values.chatId);
-    chatsStore.addNewChat(data);
-    setDialogOpen(false);
+    try {
+      const { data } = await getContactInfo(values.chatId);
+      chatsStore.addNewChat(data);
+      setDialogOpen(false);
+    } catch (e) {
+      setError("root.serverError", {
+        // @ts-expect-error
+        message: e?.message || "Unknown error",
+      });
+    }
   };
 
   return (
@@ -58,9 +74,13 @@ export const CreateNewChatForm = ({
                   {...field}
                 />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
+        <FormMessage>
+          {errors.root?.serverError.message && errors.root?.serverError.message}
+        </FormMessage>
         <div className={"w-full flex justify-end"}>
           <Button
             disabled={form.formState.isSubmitting || form.formState.isLoading}

@@ -9,17 +9,25 @@ export type ChatCard = {
 
 export type ChatsState = {
   chats: ChatCard[];
+  currentChatCard: ChatCard | null;
+  currentChatId: string | null;
 };
 
 export type ChatsActions = {
   addNewChat: (new_chat: ChatCard) => void;
   removeChat: (chatId: string) => void;
+  setCurrentChatId: (chatId: string) => void;
+  removeCurrentChatId: () => void;
+  setCurrentChatCard: (chat_card: ChatCard) => void;
+  removeCurrentChatCard: () => void;
 };
 
 export type ChatsStore = ChatsState & ChatsActions;
 
 export const defaultInitState: ChatsState = {
   chats: [],
+  currentChatId: null,
+  currentChatCard: null,
 };
 
 export const createChatsStore = (initState: ChatsState = defaultInitState) => {
@@ -42,10 +50,22 @@ export const createChatsStore = (initState: ChatsState = defaultInitState) => {
             );
             return { chats: filteredChats };
           }),
+        setCurrentChatId: (chatId: string) =>
+          set((state) => ({
+            currentChatId: chatId,
+          })),
+        removeCurrentChatId: () => set((state) => ({ currentChatId: null })),
+        setCurrentChatCard: (chat_card) =>
+          set((state) => ({
+            currentChatCard: chat_card,
+          })),
+        removeCurrentChatCard: () =>
+          set((state) => ({ currentChatCard: null })),
       }),
       {
         name: "chats-storage",
         storage: createJSONStorage(() => localStorage),
+        partialize: (state) => ({ chats: state.chats }),
       },
     ),
   );
